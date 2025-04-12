@@ -1,0 +1,19 @@
+package fst.GestionRessource.Authentication;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.List;
+
+import fst.GestionRessource.User.model.Role;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class RegisterRequest {
+    private String userNumber;
+    private String fullName;
+    private String password;
+    private List<Role> role;
+}
