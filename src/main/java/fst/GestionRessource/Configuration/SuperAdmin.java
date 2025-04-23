@@ -14,23 +14,25 @@ import java.util.Collections;
 
 @Component
 public class SuperAdmin implements ApplicationListener<ContextRefreshedEvent> {
+  @Autowired
+  private UserRepository userRepository;
 
-    @Autowired
-    private UserRepository userRepository;
+  @Autowired
+  private PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-    @Override
-    public void onApplicationEvent(ContextRefreshedEvent event) {
-        var exist = userRepository.findUserById(1);
-        if ( exist == null) {
-            var user = User.builder()
-                            .fullName("super admin")
-                            .userNumber("00000")
-                            .password(passwordEncoder.encode("0"))
-                            .role(Collections.singletonList(Role.SUPER_ADMIN))
-                            .build();
-            userRepository.save(user);
-        }
+  @Override
+  public void onApplicationEvent(ContextRefreshedEvent event) {
+    var exist = userRepository.findByUserNumber("00000").orElse(null);
+
+    if (exist == null) {
+      var user = User.builder()
+                     .id("U-00000000000000000000000000000001")
+                     .fullName("super admin")
+                     .userNumber("00000")
+                     .password(passwordEncoder.encode("0"))
+                     .role(Collections.singletonList(Role.SUPER_ADMIN))
+                     .build();
+      userRepository.save(user);
     }
+  }
 }

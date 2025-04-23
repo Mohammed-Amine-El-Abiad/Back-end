@@ -12,15 +12,14 @@ import fst.GestionRessource.Authentication.RegisterRequest;
 import fst.GestionRessource.User.model.Role;
 import fst.GestionRessource.User.model.User;
 import fst.GestionRessource.User.repository.UserRepository;
+import fst.GestionRessource.Utils.IdGenerator;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
-
-    @Autowired
+    // @Autowired
     private final UserRepository repository;
     private final PasswordEncoder passwordEncoder;
     public List<User> getUsers(){
@@ -29,12 +28,21 @@ public class UserService {
     public void createUser(RegisterRequest request) {
         if (request.getRole().contains(Role.SUPER_ADMIN)) return;
 
+        var ID = IdGenerator.generateId("U-");
+
+        while (repository.existsById(ID)) {
+            ID = IdGenerator.generateId("U-");
+        }
+
         var user = User.builder()
+                .id(ID)
                 .userNumber(request.getUserNumber())
                 .fullName(request.getFullName())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(request.getRole())
                 .build();
+
+        System.out.println(user);
         repository.save(user);
     }
 
@@ -46,7 +54,7 @@ public class UserService {
         return null;
     }
 
-    public User getUser(long id){
+    public User getUser(String id){
         User user = repository.findUserById(id);
         if(!repository.existsById(id))
                 return null;
@@ -54,11 +62,11 @@ public class UserService {
         return user;
     }
 
-    public void  deleteUser(long id){
+    public void  deleteUser(String id){
         repository.deleteById(id);
     }
 
-    public User updateUser(long id , RegisterRequest user){
+    public User updateUser(String id , RegisterRequest user){
         User existUser = repository.findUserById(id);
         if(existUser != null){
             if (user.getFullName() != null)
@@ -74,17 +82,4 @@ public class UserService {
         }
         return null;
     }
-
-    public List<User> getAllteamMember() {
-        List<User> list = repository.findAll();
-        List<User> teamMembers = new ArrayList<User>();
-
-        for(User user : list){
-            if (user.getRole().contains(Role.TEAM_MEMBER))
-                teamMembers.add(user);
-        }
-
-        return teamMembers;
-    }
-
 }

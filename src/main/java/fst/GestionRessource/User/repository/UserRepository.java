@@ -8,10 +8,10 @@ import fst.GestionRessource.User.model.User;
 import java.util.Optional;
 
 @Repository
-public interface UserRepository extends JpaRepository<User,Long> {
+public interface UserRepository extends JpaRepository<User,String> {
 
     Optional<User> findByUserNumber(String userNumber);
-    User findUserById(long id);
+    User findUserById(String id);
 
 
 }

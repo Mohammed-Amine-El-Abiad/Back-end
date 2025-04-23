@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/user")
 @RequiredArgsConstructor
 public class UserController {
 
@@ -41,7 +41,7 @@ public class UserController {
 
     }
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable long id){
+    public ResponseEntity<User> getUserById(@PathVariable String id){
         User user = userService.getUser(id);
 
         if (user != null) {
@@ -51,7 +51,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteUser(@PathVariable long id){
+    public ResponseEntity<String> deleteUser(@PathVariable String id){
             User user = userService.getUser(id);
         if (user != null) {
             userService.deleteUser(id);
@@ -62,7 +62,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Map<String,Object>> updateUser(@PathVariable long id, @RequestBody RegisterRequest user){
+    public ResponseEntity<Map<String,Object>> updateUser(@PathVariable String id, @RequestBody RegisterRequest user){
         System.out.println(id);
         System.out.println(user);
 
@@ -90,10 +90,5 @@ public class UserController {
         } else {
             return ResponseEntity.notFound().build();
         }
-    }
-
-    @GetMapping("/choose_team")
-    public List<User> getAllteamMember() {
-        return userService.getAllteamMember();
     }
 }
