@@ -2,10 +2,8 @@ package fst.GestionRessource.Configuration;
 
 import lombok.RequiredArgsConstructor;
 
-import java.io.IOException;
 import java.util.Arrays;
 
-import javax.naming.AuthenticationException;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,14 +12,13 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import jakarta.servlet.http.HttpServletRequest;
+import fst.GestionRessource.User.model.Role;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Configuration
@@ -37,11 +34,12 @@ public class SecurityConfiguration {
     // private static final String SWAGGER_PATH = "/swagger-ui/**";
     // private static final String API_DOCS_PATH = "/v3/api-docs/**";
     // private static final String ACTUATOR_PATH = "/actuator/health";
-    private static final String RESOURCES_PATH = "/api/resources/**";
+    private static final String RESOURCES_PATH = "/api/resource/**";
     private static final String PANIC_REPORTS_PATH = "/api/panic-reports/**";
-    private static final String PROPOSALS_PATH = "/api/proposals/**";
-    private static final String TENDERS_PATH = "/api/tenders/**";
-    private static final String REQUESTS_PATH = "/api/requests/**";
+    private static final String PROPOSALS_PATH = "/api/proposal/**";
+    private static final String TENDERS_PATH = "/api/tender/**";
+    private static final String REQUESTS_PATH = "/api/resource-request/**";
+    private static final String USERS_PATH = "/api/user/**";
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -71,26 +69,28 @@ public class SecurityConfiguration {
                         // .requestMatchers(AUTH_PATH, SWAGGER_PATH, API_DOCS_PATH, ACTUATOR_PATH)
                         .requestMatchers(AUTH_PATH)
                         .permitAll()
-                        .requestMatchers(HttpMethod.GET, RESOURCES_PATH)
-                        .hasAnyAuthority("TEACHER", "DEPARTMENT_HEAD", "RESOURCE_MANAGER")
-                        .requestMatchers(HttpMethod.POST, RESOURCES_PATH)
-                        .hasAuthority("RESOURCE_MANAGER")
-                        .requestMatchers(HttpMethod.POST, PANIC_REPORTS_PATH)
-                        .hasAuthority("TEACHER")
-                        .requestMatchers(PANIC_REPORTS_PATH)
-                        .hasAuthority("RESOURCE_MANAGER")
-                        .requestMatchers(HttpMethod.POST, PROPOSALS_PATH)
-                        .hasAuthority("SUPPLIER")
-                        .requestMatchers(PROPOSALS_PATH)
-                        .hasAuthority("RESOURCE_MANAGER")
-                        .requestMatchers(TENDERS_PATH)
-                        .hasAuthority("RESOURCE_MANAGER")
-                        .requestMatchers(HttpMethod.POST, REQUESTS_PATH)
-                        .hasAuthority("DEPARTMENT_HEAD")
-                        .requestMatchers(REQUESTS_PATH)
-                        .hasAuthority("RESOURCE_MANAGER")
                         .requestMatchers("/api/**")
-                        .hasAuthority("SUPER_ADMIN")
+                        .hasAuthority(Role.SUPER_ADMIN.name())
+                        .requestMatchers(USERS_PATH)
+                        .hasAnyAuthority(Role.SUPER_ADMIN.name())
+                        .requestMatchers(HttpMethod.GET, RESOURCES_PATH)
+                        .hasAnyAuthority(Role.TEACHER.name(), Role.DEPARTMENT_HEAD.name(), Role.RESOURCE_MANAGER.name())
+                        .requestMatchers(HttpMethod.POST, RESOURCES_PATH)
+                        .hasAuthority(Role.RESOURCE_MANAGER.name())
+                        .requestMatchers(HttpMethod.POST, PANIC_REPORTS_PATH)
+                        .hasAuthority(Role.TEACHER.name())
+                        .requestMatchers(PANIC_REPORTS_PATH)
+                        .hasAuthority(Role.RESOURCE_MANAGER.name())
+                        .requestMatchers(HttpMethod.POST, PROPOSALS_PATH)
+                        .hasAuthority(Role.SUPPLIER.name())
+                        .requestMatchers(PROPOSALS_PATH)
+                        .hasAuthority(Role.RESOURCE_MANAGER.name())
+                        .requestMatchers(TENDERS_PATH)
+                        .hasAuthority(Role.RESOURCE_MANAGER.name())
+                        .requestMatchers(HttpMethod.POST, REQUESTS_PATH)
+                        .hasAuthority(Role.TEACHER.name())
+                        .requestMatchers(REQUESTS_PATH)
+                        .hasAuthority(Role.RESOURCE_MANAGER.name())
                         .anyRequest()
                         .authenticated()
                 )
@@ -117,7 +117,7 @@ public class SecurityConfiguration {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "https://your-frontend.com"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);

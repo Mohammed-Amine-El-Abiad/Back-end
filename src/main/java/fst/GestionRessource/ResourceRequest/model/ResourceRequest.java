@@ -1,11 +1,16 @@
 package fst.GestionRessource.ResourceRequest.model;
 
-import fst.GestionRessource.Departement.model.Departement;
+import java.util.List;
+
+import fst.GestionRessource.Department.model.Department;
+import fst.GestionRessource.RequestedProduct.model.RequestedProduct;
+import fst.GestionRessource.Resource.model.ResourceType;
 import fst.GestionRessource.User.model.User;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,15 +22,17 @@ import lombok.NoArgsConstructor;
 public class ResourceRequest {
   @Id
   private String id;
-  private String resourceType;
-  private String specifications;
+  private ResourceType type;
   private Status status;
+
+  @OneToMany(mappedBy = "resourceRequest")
+  private List<RequestedProduct> requestedProducts;
 
   @ManyToOne
   @JoinColumn(name = "teacherId")
   private User teacher;
 
   @ManyToOne
-  @JoinColumn(name = "departementId")
-  private Departement departement;
+  @JoinColumn(name = "departmentId")
+  private Department department;
 }

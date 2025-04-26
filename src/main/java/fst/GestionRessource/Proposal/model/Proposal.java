@@ -1,14 +1,18 @@
 package fst.GestionRessource.Proposal.model;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import fst.GestionRessource.CallForTender.model.CallForTender;
+import fst.GestionRessource.ProposalProduct.model.ProposalProduct;
 import fst.GestionRessource.Supplier.model.Supplier;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,23 +24,22 @@ import lombok.NoArgsConstructor;
 public class Proposal {
   @Id
   private String id;
-  private String resourceType;
-  private String brand;
-  private Double unitPrice;
-  private Integer quantity;
-  private Double totalPrice;
   private LocalDate deliveryDate;
-  private Integer warrantyMonths;
+  private Integer warranty;
+  private Double totalPrice;
   private Boolean accepted;
 
   @ManyToOne
   @JoinColumn(name = "supplierId")
   private Supplier supplier;
 
-  @OneToOne(mappedBy = "selectedProposal")
-  private CallForTender selectedBy;
+  @OneToMany(mappedBy = "proposal", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  private List<ProposalProduct> proposalProducts;
 
   @ManyToOne
   @JoinColumn(name = "callForTenderId")
   private CallForTender callForTender;
+
+  // @OneToOne(mappedBy = "selectedProposal")
+  // private CallForTender selectedBy;
 }

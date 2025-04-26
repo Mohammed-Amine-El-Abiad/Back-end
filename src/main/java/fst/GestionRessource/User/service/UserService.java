@@ -2,7 +2,7 @@ package fst.GestionRessource.User.service;
 
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -14,7 +14,10 @@ import fst.GestionRessource.User.model.User;
 import fst.GestionRessource.User.repository.UserRepository;
 import fst.GestionRessource.Utils.IdGenerator;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -22,11 +25,18 @@ public class UserService {
     // @Autowired
     private final UserRepository repository;
     private final PasswordEncoder passwordEncoder;
+
     public List<User> getUsers(){
         return repository.findAll();
     }
-    public void createUser(RegisterRequest request) {
-        if (request.getRole().contains(Role.SUPER_ADMIN)) return;
+    public ResponseEntity<?> addUser(RegisterRequest request) {
+      if (request.getRole().contains(Role.SUPER_ADMIN)) return ResponseEntity.internalServerError().body("Super admin cannot be created.");
+
+      Optional<User> existingUser = repository.findByUserNumber(request.getUserNumber());
+
+      if (existingUser.isPresent()) {
+            return ResponseEntity.status(400).body("User with userNumber already exist.");
+        }
 
         var ID = IdGenerator.generateId("U-");
 
@@ -40,10 +50,13 @@ public class UserService {
                 .fullName(request.getFullName())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(request.getRole())
+                .department(request.getDepartment())
+                .departmentHead(request.getDepartmentHead())
                 .build();
 
-        System.out.println(user);
         repository.save(user);
+
+        return ResponseEntity.ok("User created successfully");
     }
 
     public Object getCurrentUser(){
@@ -54,32 +67,55 @@ public class UserService {
         return null;
     }
 
-    public User getUser(String id){
+    public ResponseEntity<?> getUser(String id){
         User user = repository.findUserById(id);
         if(!repository.existsById(id))
-                return null;
+                return ResponseEntity.status(404).body("User not found");
 
-        return user;
+        return ResponseEntity.ok(user);
     }
 
-    public void  deleteUser(String id){
+    public ResponseEntity<?> deleteUser(String id) {
+        if(!repository.existsById(id))
+          return ResponseEntity.status(404).body("User not found");
+
         repository.deleteById(id);
+
+        return ResponseEntity.ok("User deleted successfully");
     }
 
-    public User updateUser(String id , RegisterRequest user){
-        User existUser = repository.findUserById(id);
-        if(existUser != null){
-            if (user.getFullName() != null)
-                existUser.setFullName(user.getFullName());
-            if (user.getUserNumber() != null)
-                existUser.setUserNumber(user.getUserNumber());
-            if (user.getRole() != null)
-                existUser.setRole(user.getRole());
-            if(user.getPassword() != null && !user.getPassword().isEmpty())
-                existUser.setPassword(passwordEncoder.encode(user.getPassword()));
-            repository.save(existUser);
-            return existUser;
-        }
-        return null;
-    }
+    public ResponseEntity<?> updateUser(String id, RegisterRequest user) {
+      User existUser = repository.findUserById(id);
+      Optional<User> existingUserNumber = repository.findByUserNumber(user.getUserNumber());
+
+      if (existingUserNumber.isPresent() && existingUserNumber.get().getId() != id) {
+          String message = "User with userNumber already exist.";
+
+          Map<String, Object> response = new HashMap<>();
+          response.put("message", message);
+          return ResponseEntity.internalServerError().body(response);
+      }
+
+
+      if (existUser != null) {
+        if (user.getFullName() != null)
+          existUser.setFullName(user.getFullName());
+        if (user.getUserNumber() != null)
+          existUser.setUserNumber(user.getUserNumber());
+        if (user.getRole() != null)
+          existUser.setRole(user.getRole());
+        if (user.getPassword() != null && !user.getPassword().isEmpty())
+          existUser.setPassword(passwordEncoder.encode(user.getPassword()));
+        repository.save(existUser);
+
+        String message = "User updated successfully";
+        Map<String, Object> response = new HashMap<>();
+        response.put("user", existUser);
+        response.put("message", message);
+
+        return ResponseEntity.ok(response);
+      } else {
+        return ResponseEntity.status(404).body("User not found");
+      }
+  }
 }

@@ -2,23 +2,25 @@ package fst.GestionRessource.Supplier.model;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import fst.GestionRessource.Resource.model.Resource;
+import fst.GestionRessource.User.model.User;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Data
+@EqualsAndHashCode(callSuper = true)
 @AllArgsConstructor
 @NoArgsConstructor
-public class Supplier {
-  @Id
-	private String id;
+public class Supplier extends User {
 	private String companyName;
 	private String address;
 	private String website;
@@ -26,6 +28,7 @@ public class Supplier {
 	private boolean blacklisted;
   private String blacklistReason;
 
+  @JsonIgnoreProperties({"supplier"})
   @OneToMany(mappedBy = "supplier", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   private List<Resource> resources;
 }

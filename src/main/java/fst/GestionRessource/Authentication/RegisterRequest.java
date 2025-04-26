@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+import fst.GestionRessource.Department.model.Department;
 import fst.GestionRessource.User.model.Role;
 
 @Data
@@ -16,4 +17,6 @@ public class RegisterRequest {
     private String fullName;
     private String password;
     private List<Role> role;
+    private Department department;
+    private Department departmentHead;
 }

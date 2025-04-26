@@ -1,94 +1,40 @@
 package fst.GestionRessource.User.controller;
 
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import fst.GestionRessource.Authentication.RegisterRequest;
 import fst.GestionRessource.User.model.User;
-import fst.GestionRessource.User.repository.UserRepository;
 import fst.GestionRessource.User.service.UserService;
-
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/user")
 @RequiredArgsConstructor
 public class UserController {
 
-    private final UserService userService;
-    private final UserRepository userRepository;
+    private final UserService service;
     @GetMapping()
     public ResponseEntity<List<User>> getAllUser(){
-        return ResponseEntity.ok(userService.getUsers());
+        return ResponseEntity.ok(service.getUsers());
     }
 
     @PostMapping()
-    public ResponseEntity<String> register(
-            @RequestBody RegisterRequest request
-    ) {
-        Optional<User> existingUser = userRepository.findByUserNumber(request.getUserNumber());
-
-        if (existingUser.isPresent()) {
-            return ResponseEntity.internalServerError().body("User with userNumber already exist.");
-        }
-        userService.createUser(request);
-        return ResponseEntity.ok("User created successfully");
-
+    public ResponseEntity<?> addUser(@RequestBody RegisterRequest request) {
+        return service.addUser(request);
     }
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable String id){
-        User user = userService.getUser(id);
-
-        if (user != null) {
-            return ResponseEntity.ok(user);
-        }
-        return ResponseEntity.notFound().build();
+    public ResponseEntity<?> getUser(@PathVariable String id){
+        return service.getUser(id);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteUser(@PathVariable String id){
-            User user = userService.getUser(id);
-        if (user != null) {
-            userService.deleteUser(id);
-            return ResponseEntity.ok("User deleted successfully");
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<?> deleteUser(@PathVariable String id){
+        return service.deleteUser(id);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Map<String,Object>> updateUser(@PathVariable String id, @RequestBody RegisterRequest user){
-        System.out.println(id);
-        System.out.println(user);
-
-
-        User userExist = userService.getUser(id);
-        Optional<User> existingUserNumber = userRepository.findByUserNumber(user.getUserNumber());
-
-        if (existingUserNumber.isPresent() && existingUserNumber.get().getId() != id) {
-            String message = "User with userNumber already exist.";
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("message", message);
-            return ResponseEntity.internalServerError().body(response);
-        }
-         if (userExist != null) {
-
-            userExist = userService.updateUser(id,user);
-            String message = "User updated successfully";
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("user", userExist);
-            response.put("message", message);
-
-            return ResponseEntity.ok(response);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<?> updateUser(@PathVariable String id, @RequestBody RegisterRequest user) {
+        return service.updateUser(id, user);
     }
 }

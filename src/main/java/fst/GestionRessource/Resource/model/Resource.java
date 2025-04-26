@@ -2,12 +2,14 @@ package fst.GestionRessource.Resource.model;
 
 import java.util.List;
 
-import fst.GestionRessource.Departement.model.Departement;
+import fst.GestionRessource.Department.model.Department;
 import fst.GestionRessource.PanicReport.model.PanicReport;
 import fst.GestionRessource.Supplier.model.Supplier;
 import fst.GestionRessource.User.model.User;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
@@ -20,9 +22,11 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@ToString(exclude = {"user", "departement"})
+@ToString(exclude = { "user", "department" })
+@Inheritance(strategy = InheritanceType.JOINED)
 public class Resource {
   @Id
+  private String id;
   private String inventoryNumber;
   private String type;
   private String brand;
@@ -37,8 +41,8 @@ public class Resource {
   private User user;
 
   @ManyToOne
-  @JoinColumn(name = "assignedToDepartement")
-  private Departement departement;
+  @JoinColumn(name = "assignedToDepartment")
+  private Department department;
 
   @OneToMany(mappedBy = "resource")
   private List<PanicReport> panicReports;
